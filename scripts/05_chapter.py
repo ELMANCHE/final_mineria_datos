@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""05_chapter.py — Genera Capitulo II (2.3-2.9) en Markdown con datos reales."""
+# 05_chapter.py genera el documento del Capitulo II en Markdown con datos reales
 import os
 
 import pandas as pd
@@ -32,7 +32,7 @@ w("# CAPÍTULO II. OBTENCIÓN, PREPARACIÓN Y MODELADO DE DATOS\n")
 w("Proyecto: Exportaciones peruanas de pelo fino cardado/peinado (subpartida nacional 5105391000)\n")
 w("Fuentes: declaraciones aduaneras SUNAT (DBF), Reporte de Partida Exportador (XLS) y Cuadro G9 INEI/SUNAT.\n")
 
-# ---------------- 2.3 ----------------
+# 2.3
 w("\n## 2.3. Diccionario de datos\n")
 w("### 2.3.1 Tabla `exportaciones_detalle` (fuente: DBF Variables Específicas, 2016–2025)\n")
 w("Grano: un registro por ítem de declaración aduanera (DAM/DUA) de la partida 5105391000.\n")
@@ -121,7 +121,7 @@ w("- `dim_pais` (38 filas): pais_codigo_iso2, pais_nombre_origen, pais_iso3, pai
 w("- `dim_aduana` (6 filas): aduana_codigo + aduana_nombre — 5 aduanas del DBF + DESAGUADERO presente solo en XLS.")
 w("- `dim_puerto` (101 filas): puerto_locode UN/LOCODE + nombre real del puerto + pais_iso2; 'NO_ESPECIFICADO' para códigos '0000'/vacíos.")
 
-# ---------------- 2.4 ----------------
+# 2.4
 w("\n## 2.4. Perfilamiento\n")
 w("### 2.4.1 Volumen por fuente\n")
 tot = pd.DataFrame([
@@ -156,7 +156,7 @@ for r in [
  "Registros con fec_num en dic-2015 dentro del archivo 2016 (cruce de año).",
 ]: w(f"- {r}")
 
-# ---------------- 2.5 ----------------
+# 2.5
 w("\n## 2.5. Limpieza\n")
 w("| Regla | Campo(s) | Antes | Después |")
 w("|---|---|---|---|")
@@ -173,7 +173,7 @@ for r in [
 ]: w("| " + " | ".join(r) + " |")
 w("\nTratamiento de nulos y duplicados: **no se borró ni imputó ningún registro**. Los casos especiales (muestras, pesos en cero, códigos no especificados) se conservan con columnas bandera para trazabilidad total.")
 
-# ---------------- 2.6 ----------------
+# 2.6
 w("\n## 2.6. Transformación\n")
 w("- **Filtros**: ninguno destructivo. Se derivaron banderas: `periodo_completo_detalle` (2016–2019=TRUE), `es_muestra`, `peso_cero`, `fob_cero`, `es_exportacion_definitiva`.")
 w("- **Columnas derivadas**: `anio_numeracion`, `mes_numeracion` (desde fec_num); `aduana_codigo` en mensual (alias XLS); `partida_arancelaria` texto en G9.")
@@ -181,14 +181,14 @@ w("- **Agrupaciones**: `mensual_agregado` (año×mes×país×aduana×FOB) para a
 w("- **Consolidación anual/mensual**: mensual desde XLS (fuente completa); anual disponible por SUM en SQL sobre las 3 tablas.")
 w("- **Cálculos**: cobertura DBF vs XLS por año (`val_dbf_vs_xls`), diferencias XLS vs G9.")
 
-# ---------------- 2.7 ----------------
+# 2.7
 w("\n## 2.7. Integración\n")
 w("- **Combinación de períodos**: los 10 DBF se concatenaron por `anio_archivo`; los 10 XLS por `anio`; las 21 hojas de G9 por nombre de hoja. No hubo solapamiento de períodos entre archivos del mismo tipo.")
 w("- **Verificación de duplicación**: llave natural `ndcl+nume_serie+aduana_codigo+pais_codigo_iso2+fec_num` → 0 duplicados en el consolidado; UNIQUE constraint en Postgres.")
 w("- **Verificación de pérdida**: conteos por archivo = filas cargadas en BD (4,021 / 1,115 / 97,657). Cada XLS declara 'Total de registros: N' que coincide con las filas parseadas.")
 w("- **Cruce temporal**: `anio_archivo` vs `anio_numeracion` difieren solo en registros de fines de diciembre (fec_num dic-2015 en archivo 2016); ambos se conservan.")
 
-# ---------------- 2.8 ----------------
+# 2.8
 w("\n## 2.8. Modelo de datos\n")
 w("Modelo en estrella: tabla de hechos `exportaciones_detalle` + dimensiones `dim_pais`, `dim_aduana`, `dim_puerto`; más dos tablas de contexto `exportaciones_mensual` (agregado oficial) y `exportaciones_sector` (contexto nacional), y `val_dbf_vs_xls` (control de calidad).\n")
 w("| Tabla | PK / UNIQUE | Relaciones |")
@@ -200,7 +200,7 @@ w("| dim_pais / dim_aduana / dim_puerto | SERIAL PK; UNIQUE nombre/código | cat
 w("| val_dbf_vs_xls | anio PK | resultado de validación |")
 w("\nDiagrama: `exportaciones_detalle` (N) → dim_pais, dim_aduana, dim_puerto (1). `exportaciones_mensual` referencia los mismos catálogos por nombre/código. `exportaciones_sector` es independiente (contexto macro).\n")
 
-# ---------------- 2.9 ----------------
+# 2.9
 w("\n## 2.9. Validación\n")
 w("### 2.9.1 Cobertura DBF vs XLS vs G9 (FOB US$)\n")
 v = val.copy()

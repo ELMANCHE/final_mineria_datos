@@ -1,9 +1,5 @@
 #!/usr/bin/env python3
-"""04_load.py — Carga a NeonDB (Postgres) y validacion 2.9.
-
-Tablas: dim_pais, dim_aduana, dim_puerto, exportaciones_detalle,
-        exportaciones_mensual, exportaciones_sector, val_dbf_vs_xls
-"""
+# 04_load.py crea tablas en NeonDB y carga los datos procesados
 import os
 
 import pandas as pd

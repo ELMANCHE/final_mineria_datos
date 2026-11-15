@@ -1,16 +1,5 @@
 #!/usr/bin/env python3
-"""01_profile.py — Perfilamiento de las 3 fuentes (secciones 2.3 y 2.4).
-
-Fuentes:
-  - Data Original/Variables Especificas/*.DBF  -> detalle por declaracion
-  - Data Original/Report de Partida Exportador/*.xls -> agregados mensuales SUNAT
-  - Data Original/cdro_G9.xlsx                  -> cuadro nacional por sector (2005-2025)
-
-Salidas en processed/:
-  - dbf_all.pkl, xls_all.pkl, g9_all.pkl  (datos crudos leidos, sin tocar)
-  - profile_summary.csv                   (metricas por fuente/anio)
-  - profile_report.md                     (reporte legible para el Cap. II)
-"""
+# 01_profile.py perfilamiento de las 3 fuentes, genera salidas en processed/
 import glob
 import os
 import re
@@ -30,7 +19,7 @@ report = []
 def sec(t): report.append(f"\n## {t}\n")
 def p(*a): report.append(" ".join(str(x) for x in a))
 
-# ---------------------------------------------------------------- DBF
+# DBF
 def read_dbf(path):
     table = DBF(path, encoding="latin1", char_decode_errors="replace")
     df = pd.DataFrame(iter(table))
@@ -123,7 +112,7 @@ for anio, g in adu.groupby("anio_fuente"):
     for _, r in g.iterrows():
         p(f"    {r.CADUANA} {str(r.ADUA_DESC)[:38]:38s} regs={int(r.regs):4d} FOB={r.fob:>15,.2f}")
 
-# ---------------------------------------------------------------- XLS
+# XLS
 def read_xls_report(path):
     """Parsea el formato reporte SUNAT: datos desde fila ~11, columnas ITEM..FOB."""
     df = pd.read_excel(path, header=None)
@@ -182,7 +171,7 @@ p("\n### XLS: FOB por anio")
 for anio, g in xls.groupby("anio"):
     p(f"- {anio}: {len(g)} filas | FOB {g['fob'].sum():,.2f} US$")
 
-# ---------------------------------------------------------------- G9
+# G9
 sec("\nG9 — Cuadro nacional por sector (2005-2025)")
 g9 = pd.read_excel(os.path.join(DATA, "cdro_G9.xlsx"), sheet_name=None, header=None)
 g9_parts = []
@@ -219,7 +208,7 @@ for _, r in part.iterrows():
 p("\nTipos:", g9df["tipo"].value_counts().to_dict())
 p("Sectores top:", g9df["sector"].value_counts().head(15).to_dict())
 
-# ---------------------------------------------------------------- CRUCE
+# CRUCE
 sec("\nCRUCE DE TOTALES FOB POR ANIO (US$)")
 cmp_rows = []
 for y in range(2016, 2026):
@@ -234,7 +223,7 @@ for y in range(2016, 2026):
 pd.DataFrame(cmp_rows, columns=["anio", "dbf_regs", "dbf_fob", "xls_rows", "xls_fob", "g9_fob"]).to_csv(
     os.path.join(OUT, "totales_por_anio.csv"), index=False)
 
-# ---------------------------------------------------------------- 2025 cutoff
+# 2025 cutoff
 sec("\nCORTE TEMPORAL 2025")
 m2025 = xls[xls.anio == 2025]["mes_txt"].unique()
 p("XLS 2025 meses:", sorted(m2025))

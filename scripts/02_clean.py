@@ -1,12 +1,5 @@
 #!/usr/bin/env python3
-"""02_clean.py — Limpieza y normalizacion (seccion 2.5).
-
-Lee los pickle crudos de processed/ y genera:
-  - detalle_clean.pkl   : exportaciones_detalle (DBF, grano=item DAM)
-  - mensual_clean.pkl   : exportaciones_mensual (XLS, fuente oficial)
-  - sector_clean.pkl    : exportaciones_sector (G9, 2005-2025)
-  - dim_pais.pkl / dim_aduana.pkl / dim_puerto.pkl
-"""
+# 02_clean.py limpieza y normalizacion, genera detalle/mensual/sector clean y dimensiones
 import os
 import re
 
@@ -16,7 +9,7 @@ import pandas as pd
 BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT = os.path.join(BASE, "processed")
 
-# ------------------------------------------------------------------ DBF
+# DBF
 dbf = pd.read_pickle(os.path.join(OUT, "dbf_all.pkl"))
 
 RENAME = {
@@ -83,7 +76,7 @@ det.loc[det["puerto_embarque_locode"].isna(), "puerto_embarque_locode"] = "NO_ES
 det.to_pickle(os.path.join(OUT, "detalle_clean.pkl"))
 print("detalle_clean:", det.shape)
 
-# ------------------------------------------------------------------ XLS
+# XLS
 xls = pd.read_pickle(os.path.join(OUT, "xls_all.pkl"))
 MESES = {"Enero": 1, "Febrero": 2, "Marzo": 3, "Abril": 4, "Mayo": 5, "Junio": 6,
          "Julio": 7, "Agosto": 8, "Setiembre": 9, "Octubre": 10, "Noviembre": 11,
@@ -100,7 +93,7 @@ mon = mon[["partida_arancelaria", "aduana_nombre_xls", "pais_nombre_xls",
 mon.to_pickle(os.path.join(OUT, "mensual_clean.pkl"))
 print("mensual_clean:", mon.shape)
 
-# ------------------------------------------------------------------ G9
+# G9
 g9 = pd.read_pickle(os.path.join(OUT, "g9_all.pkl"))
 sec = g9.rename(columns={"subpartida_raw": "subpartida_raw_float",
                          "subpartida_desc": "subpartida_descripcion",
@@ -115,7 +108,7 @@ sec = sec.drop(columns=["subpartida_raw_float"])
 sec.to_pickle(os.path.join(OUT, "sector_clean.pkl"))
 print("sector_clean:", sec.shape)
 
-# ------------------------------------------------------------------ DIM PAIS
+# DIM PAIS
 # union de paises: DBF (iso2+desc) y XLS (nombre)
 NOMBRE_ES = {
     "AUSTRALIA": ("AUS", "Australia"), "AUSTRIA": ("AUT", "Austria"),
@@ -153,7 +146,7 @@ dimp = pd.DataFrame(filas).drop_duplicates()
 dimp.to_pickle(os.path.join(OUT, "dim_pais.pkl"))
 print("dim_pais:", dimp.shape)
 
-# ------------------------------------------------------------------ DIM ADUANA
+# DIM ADUANA
 # unifica codigos DBF con nombres XLS
 ALIAS_XLS = {"MARITIMA DEL CALLAO": "118", "AEREA DEL CALLAO": "235",
              "TACNA": "172", "PAITA": "046",
@@ -168,7 +161,7 @@ dima = pd.DataFrame(adu)
 dima.to_pickle(os.path.join(OUT, "dim_aduana.pkl"))
 print("dim_aduana:", dima.to_dict("records"))
 
-# ------------------------------------------------------------------ DIM PUERTO
+# DIM PUERTO
 loc = pd.read_csv(os.path.join(OUT, "locode.csv"), dtype=str).fillna("")
 loc["locode"] = loc["Country"] + loc["Location"]
 loc = loc.drop_duplicates(subset=["locode"], keep="first")

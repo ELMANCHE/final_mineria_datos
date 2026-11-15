@@ -1,10 +1,5 @@
 #!/usr/bin/env python3
-"""03_transform.py — Transformacion, consolidacion e integracion (2.6 y 2.7).
-
-Genera tablas finales en processed/:
-  - final_detalle.pkl, final_mensual.pkl, final_sector.pkl
-  - val_dbf_vs_xls.pkl (cobertura DBF vs XLS vs G9 por anio)
-"""
+# 03_transform.py transformacion e integracion, genera tablas finales y tabla de validacion
 import os
 
 import numpy as np
@@ -17,7 +12,7 @@ det = pd.read_pickle(os.path.join(OUT, "detalle_clean.pkl"))
 mon = pd.read_pickle(os.path.join(OUT, "mensual_clean.pkl"))
 sec = pd.read_pickle(os.path.join(OUT, "sector_clean.pkl"))
 
-# --- exportaciones_mensual: XLS oficial + aduana_codigo mapeado
+# exportaciones_mensual: XLS oficial + aduana_codigo mapeado
 ALIAS_XLS = {"MARITIMA DEL CALLAO": "118", "AEREA DEL CALLAO": "235",
              "TACNA": "172", "PAITA": "046",
              "MOLLENDO - MATARANI": "154", "AREQUIPA": "154", "DESAGUADERO": "DES"}
@@ -31,13 +26,13 @@ mon = mon[["partida_arancelaria", "aduana_codigo", "aduana_nombre",
            "valor_fob_usd", "item"]]
 mon.to_pickle(os.path.join(OUT, "final_mensual.pkl"))
 
-# --- sector: orden de columnas final
+# sector: orden de columnas final
 sec = sec[["partida_arancelaria", "anio", "item_ranking", "subpartida_descripcion",
            "tipo_producto", "sector_economico", "fob_usd", "peso_neto_kg",
            "peso_bruto_kg"]]
 sec.to_pickle(os.path.join(OUT, "final_sector.pkl"))
 
-# --- val_dbf_vs_xls: cobertura por anio
+# val_dbf_vs_xls: cobertura por anio
 rows = []
 for y in range(2016, 2026):
     d = det[det.anio_archivo == y]
@@ -57,7 +52,7 @@ val = pd.DataFrame(rows)
 val.to_pickle(os.path.join(OUT, "val_dbf_vs_xls.pkl"))
 print(val.to_string(index=False))
 
-# --- exportaciones_mensual consolidada (agrupacion 2.6) para analisis
+# exportaciones_mensual consolidada (agrupacion 2.6) para analisis
 agg = mon.groupby(["anio", "mes_num", "pais_nombre_origen", "aduana_codigo"],
                   as_index=False)["valor_fob_usd"].sum()
 agg.to_pickle(os.path.join(OUT, "mensual_agregado.pkl"))
