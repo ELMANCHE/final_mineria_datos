@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-# 05_chapter.py genera el documento del Capitulo II en Markdown con datos reales
 import os
 
 import pandas as pd
